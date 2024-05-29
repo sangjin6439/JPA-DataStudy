@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -49,4 +50,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> findByAge(int age, Pageable pageable);
 
     Slice<Member> findSliceByAge(int age, Pageable pageable);
+
+    /* 벌크 연산시 주의 사항!!
+    executeUpdate를 호출함 -> 변경할  때 사용, bulk쿼리에서는 영속성컨텍스트와 DB의 값이 달라 원하는 결과가 안나온다(영속성 컨텍스트의 결과가 나옴).
+     이럴때는 em.clear로 영컨의 값을 다 날려도 좋고 (clearAutomatically = true)로 자동으로 날려도 좋다.
+    */
+    @Modifying(clearAutomatically = true)
+    @Query("update Member m set m.age = m.age + 1 where m.age>=:age")
+    int bulkAgePlus(@Param("age") int age);
+
 }
