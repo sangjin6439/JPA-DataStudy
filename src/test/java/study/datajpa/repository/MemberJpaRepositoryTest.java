@@ -86,6 +86,7 @@ class MemberJpaRepositoryTest {
         int age = 10;
         int offset = 0;
         int limit = 3;
+
         //when
         List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
         long totalCount = memberJpaRepository.totalCount(age);
