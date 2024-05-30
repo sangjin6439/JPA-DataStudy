@@ -5,8 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -15,11 +17,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import study.datajpa.domain.Member;
 import study.datajpa.dto.MemberDto;
 
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
@@ -74,4 +78,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @EntityGraph(attributePaths = ("team"))
 //    @EntityGraph("Member.all")
     List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    //읽기 전용일 때에만 사용(실무에서 거의 사용 X, 스냅샷을 저장하지 않게해서 성능은 올라가지만 그렇게 영향 X)
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String name);
 }
