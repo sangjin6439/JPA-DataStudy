@@ -22,6 +22,7 @@ import jakarta.persistence.PersistenceContext;
 import study.datajpa.domain.Member;
 import study.datajpa.domain.Team;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.UsernameOnlyDto;
 
 @SpringBootTest
 @Transactional
@@ -113,9 +114,9 @@ class MemberRepositoryTest {
         memberRepository.save(m1);
         memberRepository.save(m2);
 
-        List<Member> usernameList = memberRepository.findByNames(Arrays.asList("AAA","BBB"));
+        List<Member> usernameList = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
         for (Member member : usernameList) {
-            System.out.println("member = "+member);
+            System.out.println("member = " + member);
         }
     }
 
@@ -147,7 +148,7 @@ class MemberRepositoryTest {
         Slice<Member> pageSlice = memberRepository.findSliceByAge(age, pageRequest);
 
         //페이징 된 결과를 DTO로 변환해서 반환
-        Page<MemberDto> toMap = page.map(member->new MemberDto(member.getId(), member.getUsername(), null));
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
 
         //then
         List<Member> content = page.getContent();
@@ -183,7 +184,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void findMemberLazy(){
+    public void findMemberLazy() {
         //given
         //member1 -> teamA
         //member2 -> teamB
@@ -192,7 +193,7 @@ class MemberRepositoryTest {
         Team teamB = new Team("teamB");
         teamRepository.save(teamA);
         teamRepository.save(teamB);
-        memberRepository.save(new Member("member1", 10,teamA));
+        memberRepository.save(new Member("member1", 10, teamA));
         memberRepository.save(new Member("member1", 10, teamB));
 
         em.flush();
@@ -204,15 +205,15 @@ class MemberRepositoryTest {
 
         for (Member member : members) {
             System.out.println("member" + member.getUsername());
-            System.out.println("member.teamClass = " +member.getTeam().getClass());
-            System.out.println("member.team = "+ member.getTeam().getName());
+            System.out.println("member.teamClass = " + member.getTeam().getClass());
+            System.out.println("member.team = " + member.getTeam().getName());
         }
     }
 
     @Test
-    public void queryHint(){
+    public void queryHint() {
         //given
-        Member member1 = new Member("member1",10);
+        Member member1 = new Member("member1", 10);
         memberRepository.save(member1);
         em.flush();
         em.clear();
@@ -225,7 +226,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void lock(){
+    public void lock() {
         //given
         Member member1 = new Member("member1", 10);
         memberRepository.save(member1);
@@ -237,8 +238,49 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void callCustom(){
+    public void callCustom() {
         List<Member> result = memberRepository.findMemberCustom();
     }
 
+    @Test
+    public void projections() {
+
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 10,teamA);
+        Member m2 = new Member("m2", 10,teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+//        List<UsernameOnlyDto> result = memberRepository.findProjectionsByUsername("m1", UsernameOnlyDto.class);
+//
+//        for (UsernameOnlyDto usernameOnlyDto : result) {
+//            System.out.println("usernameOnlyDto = " + usernameOnlyDto.getUsername());
+//        }
+    }
+
+    @Test
+    public void nativeQuery(){
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 10,teamA);
+        Member m2 = new Member("m2", 10,teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        Member result = memberRepository.findByNativeQuery("m1");
+        System.out.println("result = " + result);
+    }
 }

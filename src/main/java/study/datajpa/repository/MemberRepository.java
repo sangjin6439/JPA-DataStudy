@@ -21,6 +21,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import study.datajpa.domain.Member;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.UsernameOnlyDto;
 
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
@@ -85,4 +86,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String name);
+
+//    <T>List<T> findProjectionsByUsername(@Param("username") String username,Class<T> type);
+
+    @Query(value = "select username from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
 }
